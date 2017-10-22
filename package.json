@@ -4,11 +4,13 @@
   "description": "Simple Github Webhook Server",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Mahasak Pijittum",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.16.2"
+    "github-webhook-handler": "^0.6.0",
+    "http": "^0.0.0"
   }
 }
