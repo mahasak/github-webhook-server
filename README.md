@@ -1,4 +1,4 @@
 ** Infrastructure Need
 * Grafana for Dashboard
-* Telegraf for metrics
+* InfluxDB for metrics
 * MongoDB / Firebase for commit history and message
