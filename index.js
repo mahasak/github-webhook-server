@@ -50,7 +50,7 @@ handler.on('push', function (event) {
         event.payload.ref, 
         event.payload.head_commit.author.name, 
         event.payload.head_commit.message, 
-        event.payload.head_commit.commits.length); 
+        event.payload.commits.length); 
     // event.payload.ref -> ref branch
     // event.payload.head_commit.id -> head commit hash id
     // event.payload.head_commits.lenght -> commits in pushs
