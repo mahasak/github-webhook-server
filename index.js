@@ -9,15 +9,7 @@ var handler = createHandler({
 var figlet = require('figlet');
 var firebase = require('firebase');
 var app = firebase.initializeApp(config.firebase);
-
-function writeGitCommitData(commitId, ref, author, message, commits) {
-    firebase.database().ref('commits/' + commitId).set({
-        ref: ref,
-        author: author,
-        message: message,
-        commits: commits
-    });
-}
+var Influx = require('influx');
 
 figlet('Github Webhook !!', function (err, data) {
     if (err) {
@@ -43,39 +35,30 @@ handler.on('error', function (err) {
 handler.on('push', function (event) {
     console.log('Received a push event for %s to %s',
         event.payload.repository.name,
-        event.payload.ref);
-    console.log(event.payload);
-    writeGitCommitData(
-        event.payload.head_commit.id, 
-        event.payload.ref, 
-        event.payload.head_commit.author.name, 
-        event.payload.head_commit.message, 
-        event.payload.commits.length); 
-    // event.payload.ref -> ref branch
-    // event.payload.head_commit.id -> head commit hash id
-    // event.payload.head_commits.lenght -> commits in pushs
-    /**
-     * head_commit:
-        { id: 'b622b2c5faf7130fdc8c459537935f5c57f23d45',
-            tree_id: '948e408a6ee9fb5297861cf5bd183ffb4f81c02d',
-            distinct: true,
-            message: 'add debug to test',
-            timestamp: '2017-10-22T22:31:22+07:00',
-            url: 'https://github.com/mahasak/github-webhook-server/commit/b622b2c5faf7130fdc8c459537935f5c57f23d45',
-            author:
-            { name: 'Mahasak Pijittum',
-                email: 'mahasak@gmail.com',
-                username: 'mahasak' },
-            committer:
-            { name: 'Mahasak Pijittum',
-                email: 'mahasak@gmail.com',
-                username: 'mahasak' },
-            added: [],
-            removed: [],
-            modified: [ 'index.js' ] 
-        }
-     */
+        event.payload.ref
+    );
 
+    Influx.writePoints([{
+        measurement: 'github_pushes',
+        tags: {
+            host: os.hostname()
+        },
+        fields: {
+            repository: event.payload.repository.name,
+            author: event.payload.head_commit.author.name,
+            commits: event.payload.commits.length
+        },
+    }]).catch(err => {
+        console.error(`Error saving data to InfluxDB! ${err.stack}`);
+    });
+
+    writeGitCommitData(
+        event.payload.head_commit.id,
+        event.payload.ref,
+        event.payload.head_commit.author.name,
+        event.payload.head_commit.message,
+        event.payload.commits.length
+    );
 });
 
 handler.on('issues', function (event) {
@@ -83,5 +66,45 @@ handler.on('issues', function (event) {
         event.payload.repository.name,
         event.payload.action,
         event.payload.issue.number,
-        event.payload.issue.title);
+        event.payload.issue.title
+    );
+
+    Influx.writePoints([{
+        measurement: 'github_issues',
+        tags: {
+            host: os.hostname()
+        },
+        fields: {
+            repository: Ievent.payload.repository.name,
+            author: "",
+        },
+    }]).catch(err => {
+        console.error(`Error saving data to InfluxDB! ${err.stack}`);
+    });
+
+    writeIssueData(
+        event.payload.issue.number,
+        event.payload.issue.title,
+        event.payload.repository.name,
+        event.payload.action
+    );
 });
+
+function writeGitCommitData(commitId, ref, author, message, commits) {
+    firebase.database().ref('commits/' + commitId).set({
+        ref: ref,
+        author: author,
+        message: message,
+        commits: commits
+    });
+}
+
+function writeIssueData(issueNumber, issueTitle, repository, action) {
+    var guid = Guid.create().value;
+    firebase.database().ref('issues/' + guid).set({
+        issueNumber: issueNumber,
+        issueTitle: issueTitle,
+        repository: repository,
+        action: action
+    });
+}
