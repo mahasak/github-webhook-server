@@ -23,6 +23,31 @@ handler.on('push', function (event) {
         event.payload.repository.name,
         event.payload.ref);
     console.log(event.payload);
+    // event.payload.ref -> ref branch
+    // event.payload.head_commit.id -> head commit hash id
+    // event.payload.head_commits.lenght -> commits in pushs
+    /**
+     * head_commit:
+        { id: 'b622b2c5faf7130fdc8c459537935f5c57f23d45',
+            tree_id: '948e408a6ee9fb5297861cf5bd183ffb4f81c02d',
+            distinct: true,
+            message: 'add debug to test',
+            timestamp: '2017-10-22T22:31:22+07:00',
+            url: 'https://github.com/mahasak/github-webhook-server/commit/b622b2c5faf7130fdc8c459537935f5c57f23d45',
+            author:
+            { name: 'Mahasak Pijittum',
+                email: 'mahasak@gmail.com',
+                username: 'mahasak' },
+            committer:
+            { name: 'Mahasak Pijittum',
+                email: 'mahasak@gmail.com',
+                username: 'mahasak' },
+            added: [],
+            removed: [],
+            modified: [ 'index.js' ] 
+        }
+     */
+
 });
 
 handler.on('issues', function (event) {
