@@ -97,7 +97,8 @@ function writeGitCommitData(commitId, ref, author, message, commits) {
         ref: ref,
         author: author,
         message: message,
-        commits: commits
+        commits: commits,
+        timestamp: firebase.database.ServerValue.TIMESTAMP
     });
 }
 
@@ -107,6 +108,7 @@ function writeIssueData(issueNumber, issueTitle, repository, action) {
         issueNumber: issueNumber,
         issueTitle: issueTitle,
         repository: repository,
-        action: action
+        action: action,
+        timestamp: firebase.database.ServerValue.TIMESTAMP
     });
 }
