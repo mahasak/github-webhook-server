@@ -1,13 +1,35 @@
-var config = require('./config').get('development');
+var environment = process.env.NODE_ENV ? process.env.NODE_ENV : 'development';
+var config = require('./config').get(environment);
 var http = require('http');
 var createHandler = require('github-webhook-handler');
 var handler = createHandler({
     path: config.github.path,
     secret: config.github.hash
 });
+var figlet = require('figlet');
+var firebase = require('firebase');
+var app = firebase.initializeApp(config.firebase);
+
+function writeGitCommitData(commitId, ref, author, message, commits) {
+    firebase.database().ref('commits/' + commitId).set({
+        ref: ref,
+        author: author,
+        message: message,
+        commits: commits
+    });
+}
+
+figlet('Github Webhook !!', function (err, data) {
+    if (err) {
+        console.log('Something went wrong...');
+        console.dir(err);
+        return;
+    }
+    console.log(data);
+    console.log("Github-Webhook-Server listening on port " + config.server.port + " in mode " + environment);
+});
 
 http.createServer(function (req, res) {
-    console.log("Github-Webhook-Server is listening on port " + config.server.port);
     handler(req, res, function (err) {
         res.statusCode = 404;
         res.end('no such location');
@@ -23,6 +45,12 @@ handler.on('push', function (event) {
         event.payload.repository.name,
         event.payload.ref);
     console.log(event.payload);
+    writeGitCommitData(
+        event.payload.head_commit.id, 
+        event.payload.ref, 
+        event.payload.head_commit.author.name, 
+        event.payload.head_commit.message, 
+        event.payload.head_commit.commits.length); 
     // event.payload.ref -> ref branch
     // event.payload.head_commit.id -> head commit hash id
     // event.payload.head_commits.lenght -> commits in pushs
