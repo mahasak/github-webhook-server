@@ -40,7 +40,7 @@ handler.on('push', function (event) {
         event.payload.ref
     );
 
-    Influx.writePoints([{
+    influx.writePoints([{
         measurement: 'github_pushes',
         tags: {
             host: os.hostname()
@@ -71,7 +71,7 @@ handler.on('issues', function (event) {
         event.payload.issue.title
     );
 
-    Influx.writePoints([{
+    influx.writePoints([{
         measurement: 'github_issues',
         tags: {
             host: os.hostname()
