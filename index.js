@@ -11,6 +11,7 @@ var firebase = require('firebase');
 var app = firebase.initializeApp(config.firebase);
 var Influx = require('influx');
 var os = require('os');
+var influx = new Influx.InfluxDB(config.influx);
 
 figlet('Github Webhook !!', function (err, data) {
     if (err) {
