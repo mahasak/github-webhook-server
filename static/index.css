@@ -42,11 +42,9 @@ body {
 .light {
     color: blue;
     font-weight: bold;
-    font-size: larger;
 }
 
 .auth {
     color: green;
     font-weight: bold;
-    font-size: larger;
 }

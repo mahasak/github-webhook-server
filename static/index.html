@@ -31,7 +31,9 @@
                 <span class="commit"><span class="auth" >{{commit.message}}</span> (<span class="auth" >{{commit.author}}</span>)</span>
                 <div class="status">
                     <span>Hash:</span>
-                    <span class="light" >{{commit.id}}</span>
+                    <span class="light" >{{commit.commitId}}</span>
+                    <span>Timestamp:</span>
+                    <span class="light" >{{commit.timestamp}}</span>
                     <span>Date:</span>
                     <span class="light" >{{commit.date}}</span>
                     <span>Ref:</span>
@@ -63,23 +65,6 @@
             messagingSenderId: "790847070972"
         };
 
-        function timeConverter(UNIX_timestamp){
-            var a = new Date(UNIX_timestamp * 1000);
-            var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-            var year = a.getFullYear();
-            var month = months[a.getMonth()];
-            var date = a.getDate();
-            var hour = a.getHours();
-            var min = a.getMinutes();
-            var sec = a.getSeconds();
-            var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
-            return time;
-        }
-
-        function time(unix_timestamp) {
-            return new Date(unix_timestamp * 1000).format('h:i:s');
-        }
-
         var convertFromFirebase = (data) => {
             var emptyData = []
             if (data == null || data == undefined) {
@@ -89,23 +74,31 @@
             var ids = Object.keys(data)
             return ids.map(id => {
                 var beforeInfo = data[id]
-                beforeInfo.id = id
                 beforeInfo.date = moment(beforeInfo.timestamp).format("DD-MM-YYYY HH:mm:ss");
                 //beforeInfo.date = timeConverter(beforeInfo.timestamp)
                 return beforeInfo
             })
 
         }
-
         
         firebase.initializeApp(config);
         var database = firebase.database();
-        var commitDatabase = database.ref('/commits')
-        commitDatabase.orderByChild('timestamp')
-        commitDatabase.on("value", (commits) => {
-            var data = convertFromFirebase(commits.val()).reverse()
-            console.log(data);
-            App.commits = data
+        var commitDatabase = database.ref('/commits').orderByChild('timestamp').limitToLast(50).on("value", (snapshot) => {
+            //var data = convertFromFirebase(commits.val())
+            //console.log(data);
+            //App.commits = commits.val()
+
+
+            data = [];
+
+            snapshot.forEach(function(child) {
+                let obj = child.val();
+                obj.date = moment(obj.timestamp).format("DD-MM-YYYY HH:mm:ss");
+                data.push(obj);
+            }.bind(this));
+
+            App.commits = data.reverse();
+
         })
     </script>
 </body>
