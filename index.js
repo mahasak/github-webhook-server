@@ -19,14 +19,14 @@ var handler = createHandler({
 });
 
 var serveStatic = (req, res) => {
-    console.log(`${req.method} ${req.url}`);
+    console.log(`STATIC Handler => ${req.method} ${req.url}`);
 
     // parse URL
     const parsedUrl = url.parse(req.url);
-
+    
     // extract URL path
-    let pathname = `.${parsedUrl.pathname}`;
-
+    let pathname = (parsedUrl.pathname === '/') ? `./static/index.html` : `./static/${parsedUrl.pathname}`;
+    
     // based on the URL path, extract the file extention. e.g. .js, .doc, ...
     const ext = path.parse(pathname).ext;
 
@@ -77,12 +77,16 @@ var serveStatic = (req, res) => {
 dashboard.appTitle(environment, config.server.port);
 
 http.createServer(function (req, res) {
+    
+
     handler(req, res, function (err) {
-        res.statusCode = 404;
-        res.end('no such location');
+        //res.statusCode = 404;
+        //res.end('no such location');
     });
 
     serveStatic(req,res);
+
+    
 }).listen(config.server.port);
 
 handler.on('error', function (err) {
