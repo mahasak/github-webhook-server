@@ -1,0 +1,52 @@
+.card {
+    padding: 16px;
+    position: relative;
+    box-sizing: border-box;
+    background: #fff;
+    border-radius: 2px;
+    width: 90%;
+    margin: 16px;
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 1px 5px 0 rgba(0, 0, 0, 0.12);
+}
+
+.header {
+    background-color: blue;
+    width: 100%;
+    padding: 10px;
+    color: white;
+    font-weight: bold;
+    box-sizing: border-box;
+    border-radius: 2px;
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 1px 5px 0 rgba(0, 0, 0, 0.12);
+    font-size: x-large;
+}
+
+.status {
+    font-size: x-small;
+}
+
+body {
+    margin: 0;
+    background-color: lightsteelblue;
+}
+
+.message {
+    width: 90%;
+    text-align: left;
+}
+
+.commit {
+    font-size: small;
+}
+
+.light {
+    color: blue;
+    font-weight: bold;
+    font-size: larger;
+}
+
+.auth {
+    color: green;
+    font-weight: bold;
+    font-size: larger;
+}

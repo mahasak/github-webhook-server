@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic">
+    <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://unpkg.com/vue-material@0.7.5/dist/vue-material.css">
+    <link rel="stylesheet" href="./index.css">
+    <script src="https://unpkg.com/vue"></script>
+    <script src="https://unpkg.com/vue-material@0.7.5/dist/vue-material.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/4.6.0/firebase.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.19.1/moment-with-locales.min.js"></script>
+
+    <style>
+        .main-content {
+            padding: 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <md-toolbar>
+            <h1 class="md-title">
+                <img src="https://image.flaticon.com/icons/svg/25/25231.svg" width="40px" height="40px" /> Github Commit Dashboard</h1>
+        </md-toolbar>
+
+        <div class="main-content">
+            <div class="card" v-for="commit in commits">
+                <span class="commit"><span class="auth" >{{commit.message}}</span> (<span class="auth" >{{commit.author}}</span>)</span>
+                <div class="status">
+                    <span>Hash:</span>
+                    <span class="light" >{{commit.id}}</span>
+                    <span>Date:</span>
+                    <span class="light" >{{commit.date}}</span>
+                    <span>Ref:</span>
+                    <span class="light" >{{commit.ref}}</span>
+                    <span>Commits:</span>
+                    <span class="light" >{{commit.commits}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        Vue.use(VueMaterial)
+
+        var App = new Vue({
+            el: '#app',
+            data: {
+                commits: [],
+            }
+        })
+
+
+        // Initialize Firebase
+        var config = {
+            apiKey: "AIzaSyCC0_d43zFM4VIw0PS1oY7T7ERKviW3YvY",
+            authDomain: "kmitl-git-commits-2017.firebaseapp.com",
+            databaseURL: "https://kmitl-git-commits-2017.firebaseio.com",
+            projectId: "kmitl-git-commits-2017",
+            storageBucket: "kmitl-git-commits-2017.appspot.com",
+            messagingSenderId: "790847070972"
+        };
+
+        function timeConverter(UNIX_timestamp){
+            var a = new Date(UNIX_timestamp * 1000);
+            var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+            var year = a.getFullYear();
+            var month = months[a.getMonth()];
+            var date = a.getDate();
+            var hour = a.getHours();
+            var min = a.getMinutes();
+            var sec = a.getSeconds();
+            var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
+            return time;
+        }
+
+        function time(unix_timestamp) {
+            return new Date(unix_timestamp * 1000).format('h:i:s');
+        }
+
+        var convertFromFirebase = (data) => {
+            var emptyData = []
+            if (data == null || data == undefined) {
+                return []
+            }
+
+            var ids = Object.keys(data)
+            return ids.map(id => {
+                var beforeInfo = data[id]
+                beforeInfo.id = id
+                beforeInfo.date = moment(beforeInfo.timestamp).format("DD-MM-YYYY HH:mm:ss");
+                //beforeInfo.date = timeConverter(beforeInfo.timestamp)
+                return beforeInfo
+            })
+
+        }
+
+        
+        firebase.initializeApp(config);
+        var database = firebase.database();
+        var commitDatabase = database.ref('/commits')
+        commitDatabase.orderByChild('timestamp')
+        commitDatabase.on("value", (commits) => {
+            var data = convertFromFirebase(commits.val()).reverse()
+            console.log(data);
+            App.commits = data
+        })
+    </script>
+</body>
+
+</html>
