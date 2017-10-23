@@ -1,15 +1,16 @@
-const environment = process.env.NODE_ENV ? process.env.NODE_ENV : 'development';
-const config = require('./config').get(environment);
-const figlet = require('figlet');
-const createHandler = require('github-webhook-handler');
-const firebase = require('firebase');
-const firebaseApp = firebase.initializeApp(config.firebase);
-const Influx = require('influx');
-const os = require('os');
-const influx = new Influx.InfluxDB(config.influx);
-const url = require('url');
-const fs = require('fs');
-const path = require('path');
+const environment = process.env.NODE_ENV ? process.env.NODE_ENV : 'development'
+
+const config = require('./config').get(environment)
+const createHandler = require('github-webhook-handler')
+const figlet = require('figlet')
+const firebase = require('firebase')
+const firebaseApp = firebase.initializeApp(config.firebase)
+const fs = require('fs')
+const Influx = require('influx')
+const influx = new Influx.InfluxDB(config.influx)
+const os = require('os')
+const path = require('path')
+const url = require('url')
 
 const webhook = createHandler({
     path: config.github.path,
@@ -80,6 +81,7 @@ webhook.on('issues', function (event) {
 
 const writeGitCommitData = (commitId, ref, author, message, commits) => {
     firebase.database().ref('commits/' + commitId).set({
+        commitId: commitId,
         ref: ref,
         author: author,
         message: message,
@@ -99,20 +101,11 @@ const writeIssueData = (issueNumber, issueTitle, repository, action) => {
     });
 }
 
-
 const serveStatic = (req, res) => {
-    console.log(`STATIC Handler => ${req.method} ${req.url}`);
-
-    // parse URL
     const parsedUrl = url.parse(req.url);
-    
-    // extract URL path
     let pathname = (parsedUrl.pathname === '/') ? `./static/index.html` : `./static/${parsedUrl.pathname}`;
-    
-    // based on the URL path, extract the file extention. e.g. .js, .doc, ...
     const ext = path.parse(pathname).ext;
-
-    // maps file extention to MIME typere
+    
     const map = {
         '.ico': 'image/x-icon',
         '.html': 'text/html',
@@ -130,22 +123,18 @@ const serveStatic = (req, res) => {
 
     fs.exists(pathname, function (exist) {
         if (!exist) {
-            // if the file is not found, return 404
             res.statusCode = 404;
             res.end(`File ${pathname} not found!`);
             return;
         }
 
-        // if is a directory search for index file matching the extention
         if (fs.statSync(pathname).isDirectory()) pathname += '/index' + ext;
 
-        // read file from file system
         fs.readFile(pathname, function (err, data) {
             if (err) {
                 res.statusCode = 500;
                 res.end(`Error getting the file: ${err}.`);
             } else {
-                // if the file is found, set Content-type and send data
                 res.setHeader('Content-type', map[ext] || 'text/plain');
                 res.end(data);
             }
@@ -154,7 +143,7 @@ const serveStatic = (req, res) => {
 }
 
 const server = {
-    appTitle: (environment, port) => {
+    appTitle: () => {
         figlet('Github Webhook !!', function (err, data) {
             if (err) {
                 console.log('Something went wrong...');
@@ -162,15 +151,11 @@ const server = {
                 return;
             }
             console.log(data);
-            console.log("Github-Webhook-Server listening on port " + port + " in mode " + environment);
+            console.log("Github-Webhook-Server listening on port " + config.server.port + " in mode " + environment);
         })
     },
     webhook: webhook,
     serveStatic: serveStatic
 }
-
-
-
-
 
 module.exports = server;

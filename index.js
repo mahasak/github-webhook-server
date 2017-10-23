@@ -3,7 +3,7 @@ const config = require('./config').get(environment);
 const http = require('http');
 const server = require('./app');
 
-server.appTitle(environment, config.server.port);
+server.appTitle();
 
 http.createServer(function (req, res) {
     server.webhook(req, res, function (err) {});
