@@ -30,7 +30,9 @@ webhook.on('push', function (event) {
     influx.writePoints([{
         measurement: 'github_pushes',
         tags: {
-            host: os.hostname()
+            host: os.hostname(),
+            author: event.payload.head_commit.author.name,
+            repository: event.payload.repository.name
         },
         fields: {
             repository: event.payload.repository.name,
@@ -61,7 +63,9 @@ webhook.on('issues', function (event) {
     influx.writePoints([{
         measurement: 'github_issues',
         tags: {
-            host: os.hostname()
+            host: os.hostname(),
+            author: event.payload.head_commit.author.name,
+            repository: event.payload.repository.name
         },
         fields: {
             repository: Ievent.payload.repository.name,
